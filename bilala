@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>🎄 节日祝福</title>
+
+<style>
+:root{
+  --bg-a:#0f3d2e;
+  --bg-b:#1f6f54;
+  --bg-c:#0b2e22;
+  --ink:#234c3b;
+  --gold:#cfa24a;
+  --glass: rgba(255,255,255,.92);
+}
+
+html,body{
+  height:100%;
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  overflow:hidden;
+  background:
+    radial-gradient(900px 700px at 20% 10%, rgba(255,255,255,.12), transparent 60%),
+    radial-gradient(800px 600px at 80% 20%, rgba(255,255,255,.08), transparent 55%),
+    linear-gradient(135deg,var(--bg-a),var(--bg-b),var(--bg-c));
+}
+
+/* AI vibe: 背景渐变缓慢漂移 */
+.bg-shift{
+  position:fixed; inset:-20%;
+  background:
+    radial-gradient(900px 700px at 20% 10%, rgba(255,255,255,.10), transparent 60%),
+    radial-gradient(700px 550px at 70% 30%, rgba(207,162,74,.10), transparent 60%),
+    radial-gradient(800px 600px at 40% 80%, rgba(255,255,255,.06), transparent 55%),
+    linear-gradient(135deg,var(--bg-a),var(--bg-b),var(--bg-c));
+  filter:saturate(1.1);
+  animation:bgMove 18s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes bgMove{
+  0%,100%{ transform: translate3d(0,0,0) scale(1.05); }
+  50%{ transform: translate3d(-2.5%,2%,0) scale(1.08); }
+}
+
+.glow{
+  position:fixed;
+  width:580px;height:580px;
+  border-radius:50%;
+  top:-240px; right:-280px;
+  background: radial-gradient(circle at 30% 30%, rgba(255,220,150,.26), transparent 62%);
+  animation: drift 10s ease-in-out infinite;
+  pointer-events:none;
+  filter: blur(.2px);
+}
+@keyframes drift{
+  0%,100%{ transform: translate(0,0); }
+  50%{ transform: translate(-60px,45px); }
+}
+
+/* AI: 轻微全局噪点，增加质感 */
+.noise{
+  position:fixed; inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.10'/%3E%3C/svg%3E");
+  mix-blend-mode:overlay;
+  opacity:.25;
+  pointer-events:none;
+}
+
+/* canvas 粒子网络层 */
+#aiCanvas{
+  position:fixed; inset:0;
+  pointer-events:none;
+  opacity:.55;
+}
+
+.snowflake{
+  position:fixed;
+  top:-10%;
+  color:#fff;
+  opacity:.85;
+  pointer-events:none;
+  animation: fall linear infinite;
+}
+@keyframes fall{
+  from{ transform:translateY(-10vh); }
+  to{ transform:translateY(110vh); }
+}
+
+.wrap{
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:22px;
+}
+
+.card{
+  width:min(380px,92vw);
+  background: var(--glass);
+  border-radius:28px;
+  padding:34px 28px 26px;
+  text-align:center;
+  box-shadow:0 26px 70px rgba(0,0,0,.38);
+  border:1px solid rgba(255,255,255,.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  position:relative;
+  overflow:hidden;
+  transform: translateZ(0);
+}
+
+/* AI: 卡片上方“光带扫过” */
+.card::before{
+  content:"";
+  position:absolute;
+  inset:-30% -60%;
+  background: linear-gradient(110deg, transparent 35%, rgba(255,255,255,.55) 45%, transparent 55%);
+  transform: translateX(-40%);
+  animation: sheen 4.6s ease-in-out infinite;
+  opacity:.55;
+  pointer-events:none;
+}
+@keyframes sheen{
+  0%{ transform: translateX(-55%) rotate(0.01deg); opacity:.0; }
+  18%{ opacity:.5; }
+  45%{ opacity:.3; }
+  100%{ transform: translateX(55%) rotate(0.01deg); opacity:0; }
+}
+
+.badge{
+  display:inline-block;
+  font-size:12px;
+  color:#fff;
+  background:var(--gold);
+  padding:4px 10px;
+  border-radius:999px;
+  margin-bottom:12px;
+  box-shadow: 0 8px 18px rgba(207,162,74,.25);
+}
+
+h1{ margin:0 0 10px; color:#1f5a44; }
+
+.sub{
+  font-size:12px;
+  color:rgba(31,90,68,.78);
+  margin-top:-2px;
+}
+
+.text{
+  min-height:150px;
+  white-space:pre-line;
+  color:var(--ink);
+  line-height:1.7;
+  font-size:16px;
+  margin-top:14px;
+}
+
+/* AI: 打字时闪烁光标 */
+.cursor{
+  display:inline-block;
+  width:8px;
+  height:18px;
+  vertical-align:-3px;
+  background: rgba(31,90,68,.55);
+  margin-left:2px;
+  border-radius: 3px;
+  animation: blink 1s steps(2,end) infinite;
+}
+@keyframes blink{
+  50%{ opacity:0; }
+}
+
+.actions{
+  margin-top:16px;
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+
+.btn{
+  padding:10px 16px;
+  border-radius:999px;
+  border:none;
+  background:var(--gold);
+  color:#fff;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.btn.ghost{
+  background:#fff;
+  color:#1f6f54;
+  border:1px solid rgba(31,111,84,.35);
+}
+
+.from{
+  margin-top:14px;
+  font-size:14px;
+  color:#1f5a44;
+  opacity:.95;
+}
+
+/* 小提示 */
+.tip{
+  margin-top:10px;
+  font-size:12px;
+  color:rgba(35,76,59,.65);
+}
+</style>
+</head>
+
+<body>
+
+<div class="bg-shift"></div>
+<canvas id="aiCanvas"></canvas>
+<div class="glow"></div>
+<div class="noise"></div>
+
+<div class="wrap">
+  <div class="card" id="card">
+    <div class="badge" id="badge">🎄 节日问候</div>
+    <h1 id="title">给你</h1>
+    <div class="sub">（不用点继续，会自动播放文字）</div>
+
+    <div class="text" id="text"></div>
+
+    <div class="actions">
+      <button class="btn ghost" id="skipBtn">⏭️ 跳到下一句</button>
+      <button class="btn ghost" id="musicBtn">🎵 播放圣诞歌</button>
+    </div>
+
+    <div class="tip">你也可以点击卡片，直接切换下一句。</div>
+    <div class="from">—— ZF</div>
+  </div>
+</div>
+
+<audio id="bgm" preload="auto" playsinline loop>
+  <source src="https://cdn.pixabay.com/download/audio/2022/12/06/audio_6a0c7b3c25.mp3?filename=christmas-village-ambient-124008.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+/* ===== 标识（今天/过期） ===== */
+const now = new Date();
+const endTime = new Date(now);
+endTime.setHours(24,0,0,0);
+document.getElementById("badge").textContent =
+  now < endTime ? "🎄 圣诞快乐" : "❄️ 节日问候";
+
+/* ===== 祝福语：同事/朋友都适用（普通、不尴尬） ===== */
+const messages = [
+  "嗨 👋\n圣诞快乐 🎄",
+  "忙了一年，\n辛苦啦～",
+  "愿你接下来的日子：\n睡得香、吃得好、心情也更好 🙂",
+  "愿烦恼少一点，\n好运多一点 ✨",
+  "愿工作顺顺利利，\n生活开开心心。",
+  "最后一句：\n平安喜乐，万事胜意 ❄️"
+];
+
+/* ===== 自动播文案（无需继续按钮） ===== */
+const textBox = document.getElementById("text");
+const card = document.getElementById("card");
+const skipBtn = document.getElementById("skipBtn");
+
+let step = 0;
+let typing = false;
+let timerNext = null;
+
+function clearTimers(){
+  if(timerNext) { clearTimeout(timerNext); timerNext = null; }
+}
+
+function typeText(msg, speed = 52){
+  typing = true;
+  textBox.textContent = "";
+  const cursor = document.createElement("span");
+  cursor.className = "cursor";
+  textBox.appendChild(cursor);
+
+  let i = 0;
+  function tick(){
+    if(i < msg.length){
+      cursor.remove();
+      textBox.textContent += msg[i++];
+      textBox.appendChild(cursor);
+      setTimeout(tick, speed);
+    }else{
+      typing = false;
+      // 打完后停留一下再自动下一句
+      clearTimers();
+      timerNext = setTimeout(nextMessage, 1600);
+    }
+  }
+  tick();
+}
+
+function nextMessage(){
+  if(typing) return; // 打字中不切
+  step = (step + 1) % messages.length;
+  typeText(messages[step]);
+}
+
+function startSequence(){
+  step = 0;
+  typeText(messages[step]);
+}
+
+skipBtn.addEventListener("click", () => {
+  clearTimers();
+  if(typing){
+    // 如果正在打字，直接一次性显示完整内容，再进入下一句
+    const msg = messages[step];
+    textBox.textContent = msg;
+    typing = false;
+    timerNext = setTimeout(nextMessage, 700);
+  }else{
+    nextMessage();
+  }
+});
+
+card.addEventListener("click", (e) => {
+  // 避免点到按钮也触发卡片点击
+  if(e.target.tagName.toLowerCase() === "button") return;
+  skipBtn.click();
+});
+
+startSequence();
+
+/* ===== 雪花 ===== */
+for(let i = 0; i < 28; i++){
+  const s = document.createElement("div");
+  s.className = "snowflake";
+  s.textContent = ["❄","❅","❆"][Math.floor(Math.random()*3)];
+  s.style.left = Math.random() * 100 + "vw";
+  s.style.fontSize = (12 + Math.random() * 16) + "px";
+  s.style.animationDuration = (6 + Math.random() * 9) + "s";
+  s.style.animationDelay = (-Math.random() * 10) + "s";
+  s.style.opacity = (0.55 + Math.random() * 0.35).toFixed(2);
+  document.body.appendChild(s);
+}
+
+/* ===== AI 粒子网络特效（轻量） ===== */
+const canvas = document.getElementById("aiCanvas");
+const ctx = canvas.getContext("2d");
+let w, h, particles = [];
+const COUNT = 52;
+const LINK_DIST = 120;
+
+function resize(){
+  w = canvas.width = window.innerWidth * devicePixelRatio;
+  h = canvas.height = window.innerHeight * devicePixelRatio;
+  canvas.style.width = window.innerWidth + "px";
+  canvas.style.height = window.innerHeight + "px";
+}
+window.addEventListener("resize", resize);
+resize();
+
+function rand(min,max){ return Math.random()*(max-min)+min; }
+
+function initParticles(){
+  particles = Array.from({length: COUNT}, () => ({
+    x: rand(0,w), y: rand(0,h),
+    vx: rand(-0.25,0.25) * devicePixelRatio,
+    vy: rand(-0.25,0.25) * devicePixelRatio,
+    r: rand(1.2,2.4) * devicePixelRatio
+  }));
+}
+initParticles();
+
+function draw(){
+  ctx.clearRect(0,0,w,h);
+
+  // 点
+  for(const p of particles){
+    p.x += p.vx; p.y += p.vy;
+
+    if(p.x<0||p.x>w) p.vx*=-1;
+    if(p.y<0||p.y>h) p.vy*=-1;
+
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle = "rgba(255,255,255,0.55)";
+    ctx.fill();
+  }
+
+  // 线（近距离连接）
+  for(let i=0;i<particles.length;i++){
+    for(let j=i+1;j<particles.length;j++){
+      const a = particles[i], b = particles[j];
+      const dx = a.x-b.x, dy = a.y-b.y;
+      const d = Math.hypot(dx,dy);
+      if(d < LINK_DIST * devicePixelRatio){
+        const alpha = (1 - d/(LINK_DIST*devicePixelRatio)) * 0.22;
+        ctx.strokeStyle = `rgba(207,162,74,${alpha})`;
+        ctx.lineWidth = 1 * devicePixelRatio;
+        ctx.beginPath();
+        ctx.moveTo(a.x,a.y);
+        ctx.lineTo(b.x,b.y);
+        ctx.stroke();
+      }
+    }
+  }
+
+  requestAnimationFrame(draw);
+}
+draw();
+
+/* ===== 音乐（可播放/暂停，并更新按钮文字） ===== */
+const bgm = document.getElementById("bgm");
+const musicBtn = document.getElementById("musicBtn");
+let playing = false;
+bgm.volume = 0.08;
+
+function fadeIn(){
+  let v = 0.08;
+  const t = setInterval(() => {
+    v += 0.03;
+    bgm.volume = Math.min(v, 0.5);
+    if(v >= 0.5) clearInterval(t);
+  }, 90);
+}
+
+async function playMusic(){
+  musicBtn.textContent = "⏳ 播放中…";
+  try{
+    await bgm.play();
+    playing = true;
+    fadeIn();
+    musicBtn.textContent = "⏸️ 暂停音乐";
+  }catch(e){
+    musicBtn.textContent = "🎵 再点一次";
+    alert("浏览器限制音频播放：请再点一次按钮（或点一下页面空白处）再试。");
+  }
+}
+
+function pauseMusic(){
+  bgm.pause();
+  playing = false;
+  musicBtn.textContent = "🎵 播放圣诞歌";
+}
+
+musicBtn.addEventListener("click", () => {
+  if(!playing) playMusic();
+  else pauseMusic();
+});
+
+document.addEventListener("visibilitychange", () => {
+  if(document.hidden && playing){
+    pauseMusic();
+  }
+});
+</script>
+
+</body>
+</html>
